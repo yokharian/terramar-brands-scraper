@@ -1,54 +1,72 @@
-/**
- * This template is a production ready boilerplate for developing with `PlaywrightCrawler`.
- * Use this to bootstrap your projects using the most up-to-date code.
- * If you're looking for examples or want to learn more, see README.
- */
+import { CheerioCrawler } from '@crawlee/cheerio';
+import { Actor, log } from 'apify';
 
-// For more information, see https://crawlee.dev
-import { PlaywrightCrawler } from '@crawlee/playwright';
-// For more information, see https://docs.apify.com/sdk/js
-import { Actor } from 'apify';
+import { buildDepartmentLookup,fetchDepartments, fetchProducts } from './api.js';
+import { transformProduct } from './transform.js';
+import type { Input } from './types.js';
 
-// this is ESM project, and as such, it requires you to specify extensions in your relative imports
-// read more about this here: https://nodejs.org/docs/latest-v18.x/api/esm.html#mandatory-file-extensions
-// note that we need to use `.js` even when inside TS files
-import { router } from './routes.js';
-
-interface Input {
-    startUrls: {
-        url: string;
-        method?: 'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'TRACE' | 'OPTIONS' | 'CONNECT' | 'PATCH';
-        headers?: Record<string, string>;
-        userData: Record<string, unknown>;
-    }[];
-    maxRequestsPerCrawl: number;
-}
-
-// Initialize the Apify SDK
 await Actor.init();
 
-// Structure of input is defined in input_schema.json
-const { startUrls = ['https://apify.com'], maxRequestsPerCrawl = 100 } =
-    (await Actor.getInput<Input>()) ?? ({} as Input);
+const input = await Actor.getInput<Input>();
 
-// `checkAccess` flag ensures the proxy credentials are valid, but the check can take a few hundred milliseconds.
-// Disable it for short runs if you are sure your proxy configuration is correct
-const proxyConfiguration = await Actor.createProxyConfiguration({ checkAccess: true });
+const {
+    startUrls = [{ url: 'https://www.terramarbrands.com.mx/products', userData: {} } as const],
+    maxRequestsPerCrawl = 50,
+} = input ?? ({} as Input);
 
-const crawler = new PlaywrightCrawler({
-    proxyConfiguration,
+const departments = await fetchDepartments();
+const deptLookup = buildDepartmentLookup(departments);
+
+const productDeptIds = Object.keys(deptLookup);
+log.info(`Found ${productDeptIds.length} product departments: ${productDeptIds.join(', ')}`);
+
+const crawler = new CheerioCrawler({
     maxRequestsPerCrawl,
-    requestHandler: router,
-    launchContext: {
-        launchOptions: {
-            args: [
-                '--disable-gpu', // Mitigates the "crashing GPU process" issue in Docker containers
-            ],
-        },
+    async requestHandler({ request }) {
+        const label = request.userData?.label as string;
+
+        if (label === 'CATALOG') {
+            log.info('Processing catalog request', { url: request.url });
+            const allProducts = await fetchProducts(0);
+            log.info(`Processing ${allProducts.length} products from full catalog`);
+
+            for (const raw of allProducts) {
+                const item = transformProduct(raw, deptLookup);
+                await Actor.pushData(item);
+            }
+            log.info(`Pushed ${allProducts.length} products to dataset`);
+            return;
+        }
+
+        if (label === 'DEPT') {
+            const deptId = request.userData?.deptId as string;
+            log.info('Processing department request', { url: request.url, deptId });
+            const products = await fetchProducts(deptId);
+            log.info(`Processing ${products.length} products from department ${deptId}`);
+
+            for (const raw of products) {
+                const item = transformProduct(raw, deptLookup);
+                await Actor.pushData(item);
+            }
+            log.info(`Pushed ${products.length} products from department ${deptId}`);
+            return;
+        }
+
+        log.warning('Unknown request label, treating as catalog', { label, url: request.url });
+        const allProducts = await fetchProducts(0);
+        for (const raw of allProducts) {
+            const item = transformProduct(raw, deptLookup);
+            await Actor.pushData(item);
+        }
+        log.info(`Pushed ${allProducts.length} products from default handler`);
     },
 });
 
-await crawler.run(startUrls);
+const requests = startUrls.map((s) => ({
+    url: s.url,
+    userData: { label: 'CATALOG', ...s.userData },
+}));
 
-// Exit successfully
+await crawler.run(requests);
+
 await Actor.exit();
