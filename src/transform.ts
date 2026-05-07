@@ -1,8 +1,9 @@
 import { resolveDepartmentName, resolveSubDepartmentName } from './api.js';
-import type { DepartmentLookup,ProductItem, RawApiProduct } from './types.js';
+import type { DepartmentLookup, ProductItem, RawApiProduct } from './types.js';
 
-const PRODUCT_URL_BASE = 'https://www.terramarbrands.com.mx/products/product';
-const IMAGE_URL_BASE = 'https://www.terramarbrands.com.mx/pics/productos/grandes';
+export interface SiteConfig {
+    baseUrl: string;
+}
 
 function stripHtml(html: string): string {
     if (!html) return '';
@@ -21,13 +22,13 @@ function stripHtml(html: string): string {
         .trim();
 }
 
-function buildImageUrls(product: RawApiProduct): string[] {
+function buildImageUrls(product: RawApiProduct, siteConfig: SiteConfig): string[] {
     const urls: string[] = [];
-    urls.push(`${IMAGE_URL_BASE}/${product.clave}.png`);
+    urls.push(`${siteConfig.baseUrl}/pics/productos/grandes/${product.clave}.png`);
     if (product.imagen) {
         const fullUrl = product.imagen.startsWith('http')
             ? product.imagen
-            : `https://www.terramarbrands.com.mx${product.imagen}`;
+            : `${siteConfig.baseUrl}${product.imagen}`;
         if (!urls.includes(fullUrl)) {
             urls.push(fullUrl);
         }
@@ -38,6 +39,7 @@ function buildImageUrls(product: RawApiProduct): string[] {
 export function transformProduct(
     raw: RawApiProduct,
     deptLookup: DepartmentLookup,
+    siteConfig: SiteConfig,
 ): ProductItem {
     return {
         sku: raw.clave,
@@ -52,10 +54,10 @@ export function transformProduct(
         application: stripHtml(raw.aplicacion),
         ingredients: stripHtml(raw.ingredientes),
         olfactiveFamily: raw.familiaOlfativa,
-        imageUrls: buildImageUrls(raw),
+        imageUrls: buildImageUrls(raw, siteConfig),
         hasCarousel: raw.carrusel === 'S',
         variantClass: raw.clase,
-        url: `${PRODUCT_URL_BASE}/${raw.clave}`,
+        url: `${siteConfig.baseUrl}/products/product/${raw.clave}`,
     };
 }
 

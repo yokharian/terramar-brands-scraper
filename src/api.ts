@@ -1,11 +1,9 @@
 import { log } from 'apify';
 
-import type { DepartmentInfo,DepartmentLookup, RawApiDepartment, RawApiProduct } from './types.js';
+import type { DepartmentInfo, DepartmentLookup, RawApiDepartment, RawApiProduct } from './types.js';
 
-const API_BASE = 'https://terramarbrands.mx/wsTerramarV2/Service1.svc';
-
-export async function fetchDepartments(): Promise<RawApiDepartment[]> {
-    const url = `${API_BASE}/getDeptos`;
+export async function fetchDepartments(apiBaseUrl: string): Promise<RawApiDepartment[]> {
+    const url = `${apiBaseUrl}/getDeptos`;
     log.info('Fetching departments', { url });
     const response = await fetch(url);
     if (!response.ok) {
@@ -16,11 +14,12 @@ export async function fetchDepartments(): Promise<RawApiDepartment[]> {
     return data;
 }
 
-export async function fetchProducts(depto?: string | number, clave?: string): Promise<RawApiProduct[]> {
-    let url = `${API_BASE}/getDescripciones?depto=${depto ?? 0}`;
+export async function fetchProducts(apiBaseUrl: string, depto?: string | number, clave?: string): Promise<RawApiProduct[]> {
+    const params = new URLSearchParams({ depto: String(depto ?? 0) });
     if (clave) {
-        url += `&clave=${encodeURIComponent(clave)}`;
+        params.set('clave', clave);
     }
+    const url = `${apiBaseUrl}/getDescripciones?${params.toString()}`;
     log.info('Fetching products', { url });
     const response = await fetch(url);
     if (!response.ok) {
