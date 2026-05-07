@@ -28,11 +28,13 @@
         "start:prod": "node dist/main.js",
         "start:dev": "tsx src/main.ts",
         "build": "tsc",
-        "lint": "eslint",
-        "lint:fix": "eslint --fix",
+        "lint": "eslint src/",
+        "lint:fix": "eslint --fix src/",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
-        "test": "vitest run"
+        "test": "vitest run",
+        "validate": "node scripts/pre-push-check.js",
+        "predeploy": "npm run validate && npm test && npm run lint"
     },
     "author": "It's not you it's me",
     "license": "ISC"
