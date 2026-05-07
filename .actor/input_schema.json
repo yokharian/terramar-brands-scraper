@@ -8,12 +8,14 @@
             "title": "Base URL",
             "type": "string",
             "description": "Base URL of the Terramar Brands website. Used to construct product page URLs and image CDN paths.",
+            "editor": "textfield",
             "default": "https://terramarbrands.com.mx"
         },
         "apiBaseUrl": {
             "title": "API Base URL",
             "type": "string",
             "description": "Base URL of the Terramar Brands WCF API. Used to fetch department and product data.",
+            "editor": "textfield",
             "default": "https://terramarbrands.mx/wsTerramarV2/Service1.svc"
         },
         "maxRequestsPerCrawl": {
