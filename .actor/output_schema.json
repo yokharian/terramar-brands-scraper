@@ -2,10 +2,12 @@
     "$schema": "https://apify.com/schemas/v1/output.ide.json",
     "actorOutputSchemaVersion": 1,
     "title": "Terramar Brands Product Scraper Output",
+    "description": "Output from the Terramar Brands product catalog scraper. Each item represents a normalized product from terramarbrands.com.mx with SKU, price, department, description, and image data.",
     "properties": {
         "dataset": {
             "type": "string",
             "title": "Dataset",
+            "description": "Full dataset of ~225 normalized product items",
             "template": "{{links.apiDefaultDatasetUrl}}/items"
         }
     }
