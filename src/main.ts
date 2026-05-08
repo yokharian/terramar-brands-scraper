@@ -37,22 +37,9 @@ const crawler = new CheerioCrawler({
     async requestHandler({ request }) {
         const label = request.userData?.label as string;
 
-        if (label === 'CATALOG') {
-            log.info('Processing catalog request', { url: request.url });
-            const allProducts = await fetchProducts(apiBaseUrl, 0);
-            log.info(`Processing ${allProducts.length} products from full catalog`);
-
-            for (const raw of allProducts) {
-                const item = transformProduct(raw, deptLookup, siteConfig);
-                await Actor.pushData(item);
-            }
-            log.info(`Pushed ${allProducts.length} products to dataset`);
-            return;
-        }
-
         if (label === 'DEPT') {
             const deptId = request.userData?.deptId as string;
-            log.info('Processing department request', { url: request.url, deptId });
+            log.info(`Processing department request from department ${deptId}`);
             const products = await fetchProducts(apiBaseUrl, deptId);
             log.info(`Processing ${products.length} products from department ${deptId}`);
 
@@ -61,20 +48,25 @@ const crawler = new CheerioCrawler({
                 await Actor.pushData(item);
             }
             log.info(`Pushed ${products.length} products from department ${deptId}`);
-            return;
+        } else if (label === 'CATALOG') {
+            log.info('Processing catalog request');
+            const allProducts = await fetchProducts(apiBaseUrl, 0);
+            log.info(`Processing ${allProducts.length} products from full catalog`);
+
+            for (const raw of allProducts) {
+                const item = transformProduct(raw, deptLookup, siteConfig);
+                await Actor.pushData(item);
+            }
+            log.info(`Pushed ${allProducts.length} products to dataset`);
+        }
+        else {
+            throw new Error(`Unknown request label: ${label}`);
         }
 
-        log.warning('Unknown request label, treating as catalog', { label, url: request.url });
-        const allProducts = await fetchProducts(apiBaseUrl, 0);
-        for (const raw of allProducts) {
-            const item = transformProduct(raw, deptLookup, siteConfig);
-            await Actor.pushData(item);
-        }
-        log.info(`Pushed ${allProducts.length} products from default handler`);
     },
 });
 
-await crawler.run([{ url: `${baseUrl}/products`, userData: { label: 'CATALOG' } }]);
+await crawler.run([{userData: { label: 'CATALOG' } }]);
 
 logMemory('after-crawl');
 await Actor.exit();
