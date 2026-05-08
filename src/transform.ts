@@ -23,13 +23,11 @@ function stripHtml(html: string): string {
         .trim();
 }
 
-function buildImageUrls(product: RawApiProduct, webImagesBaseUrl: string, baseUrl: string): string[] {
+function buildImageUrls(product: RawApiProduct, webImagesBaseUrl: string): string[] {
     const urls: string[] = [];
-    urls.push(`${webImagesBaseUrl}/shopping-cart/color/${product.clave}.jpg`);
+    urls.push(`${webImagesBaseUrl}/shopping-cart/cart-products/${product.clave}.jpg`);
     if (product.imagen) {
-        const fullUrl = product.imagen.startsWith('http')
-            ? product.imagen
-            : `${baseUrl}${product.imagen}`;
+        const fullUrl = product.imagen;
         if (!urls.includes(fullUrl)) {
             urls.push(fullUrl);
         }
@@ -59,7 +57,7 @@ export function transformProduct(
         application: stripHtml(raw.aplicacion),
         ingredients: stripHtml(raw.ingredientes),
         olfactiveFamily: raw.familiaOlfativa,
-        imageUrls: buildImageUrls(raw, siteConfig.webImagesBaseUrl, siteConfig.baseUrl),
+        imageUrls: buildImageUrls(raw, siteConfig.webImagesBaseUrl),
         fichaTecnica: buildFichaTecnica(raw, siteConfig.webImagesBaseUrl),
         hasCarousel: raw.carrusel === 'S',
         variantClass: raw.clase,
