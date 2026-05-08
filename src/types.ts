@@ -76,7 +76,8 @@ export type DepartmentLookup = Record<string, DepartmentInfo>;
  * - `application` ← `aplicacion` (HTML stripped)
  * - `ingredients` ← `ingredientes` (HTML stripped)
  * - `olfactiveFamily` ← `familiaOlfativa` (direct)
- * - `imageUrls` ← constructed: `{SITE}/pics/productos/grandes/{clave}.png` + `imagen` fallback
+ * - `imageUrls` ← constructed: `{webImagesBaseUrl}/shopping-cart/color/{clave}.jpg` + `imagen` fallback
+ * - `fichaTecnica` ← constructed: `{webImagesBaseUrl}/webpage/productos/fichasTecnicas/{clave}.pdf`
  * - `hasCarousel` ← `carrusel === "S"`
  * - `variantClass` ← `clase` (direct)
  * - `url` ← constructed: `{SITE}/products/product/{clave}`
@@ -95,6 +96,7 @@ export interface ProductItem {
     ingredients: string;
     olfactiveFamily: string;
     imageUrls: string[];
+    fichaTecnica: string;
     hasCarousel: boolean;
     variantClass: string;
     url: string;
@@ -103,6 +105,7 @@ export interface ProductItem {
 /** Actor input schema (matches .actor/input_schema.json) */
 export interface Input {
     baseUrl?: string;
+    webImagesBaseUrl?: string;
     apiBaseUrl?: string;
     maxRequestsPerCrawl: number;
 }

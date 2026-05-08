@@ -7,9 +7,16 @@
         "baseUrl": {
             "title": "Base URL",
             "type": "string",
-            "description": "Base URL of the Terramar Brands website. Used to construct product page URLs and image CDN paths.",
+            "description": "Base URL of the Terramar Brands website. Used to construct product page URLs.",
             "editor": "textfield",
             "default": "https://terramarbrands.com.mx"
+        },
+        "webImagesBaseUrl": {
+            "title": "Web Images Base URL",
+            "type": "string",
+            "description": "Base URL of the image CDN. Used to construct product image and technical data sheet URLs.",
+            "editor": "textfield",
+            "default": "https://webimages.terramarbrands.com.mx"
         },
         "apiBaseUrl": {
             "title": "API Base URL",

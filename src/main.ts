@@ -16,13 +16,14 @@ const input = await Actor.getInput<Input>();
 
 // Defaults match .actor/input_schema.json
 const baseUrl = input?.baseUrl?.replace(/\/+$/, '') ?? 'https://terramarbrands.com.mx';
+const webImagesBaseUrl = input?.webImagesBaseUrl?.replace(/\/+$/, '') ?? 'https://webimages.terramarbrands.com.mx';
 const apiBaseUrl = input?.apiBaseUrl?.replace(/\/+$/, '') ?? 'https://terramarbrands.mx/wsTerramarV2/Service1.svc';
 
 const { maxRequestsPerCrawl = 50 } = input ?? ({} as Input);
 
-const siteConfig = { baseUrl };
+const siteConfig = { baseUrl, webImagesBaseUrl };
 
-log.info('Configuration', { baseUrl, apiBaseUrl, maxRequestsPerCrawl });
+log.info('Configuration', { baseUrl, webImagesBaseUrl, apiBaseUrl, maxRequestsPerCrawl });
 logMemory('startup');
 
 const departments = await fetchDepartments(apiBaseUrl);
