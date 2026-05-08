@@ -1,27 +1,122 @@
 {
-    "$schema": "https://apify.com/schemas/v1/dataset.ide.json",
     "actorSpecification": 1,
+    "title": "Terramar Brands Product Catalog",
+    "description": "Normalized product catalog scraped from the Terramar Brands WCF API. Each item represents a product variant with SKU, pricing, department, descriptions, and media links.",
     "fields": {
-        "sku": { "type": "string", "title": "SKU", "description": "Product SKU code from the `clave` field (unique per variant)" },
-        "name": { "type": "string", "title": "Product Name", "description": "Product name in Spanish from the `producto` field" },
-        "price": { "type": "integer", "title": "Price (MXN)", "description": "Price in MXN parsed from the `precio` string field (range 170–1670)" },
-        "currency": { "type": "string", "title": "Currency", "description": "Always MXN" },
-        "departmentId": { "type": "string", "title": "Department ID", "description": "Department code 1–10 from the `departamento` field" },
-        "department": { "type": "string", "title": "Department", "description": "Department name resolved from /getDeptos lookup (e.g. Color, Fragancias)" },
-        "subdepartmentId": { "type": "string", "title": "Subdepartment ID", "description": "Subdepartment code from the `subdepartamento` field" },
-        "subdepartment": { "type": "string", "title": "Subdepartment", "description": "Subdepartment name resolved from /getDeptos secciones (e.g. Rostro, Él)" },
-        "description": { "type": "string", "title": "Description", "description": "Product description with HTML tags stripped, from the `descripcion` field" },
-        "application": { "type": "string", "title": "Application Instructions", "description": "Application/usage instructions with HTML stripped, from the `aplicacion` field" },
-        "ingredients": { "type": "string", "title": "Ingredients", "description": "Ingredients info with HTML stripped, from the `ingredientes` field" },
-        "olfactiveFamily": { "type": "string", "title": "Olfactive Family", "description": "Olfactory family for fragrances (empty for most products, 4/225 have values)" },
-        "imageUrls": { "type": "array", "title": "Image URLs", "description": "Constructed image URLs: primary from /pics/productos/grandes/{clave}.png, fallback from `imagen` field", "items": { "type": "string" } },
-        "hasCarousel": { "type": "boolean", "title": "Has Image Carousel", "description": "Whether the product has an image carousel (carrusel='S', true for 95/225 products)" },
-        "variantClass": { "type": "string", "title": "Variant Class", "description": "Variant/shade class number from `clase` field (30/225 products have values)" },
-        "url": { "type": "string", "title": "Product URL", "description": "Constructed SPA product page URL: /products/product/{clave}" }
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "sku": {
+                "type": "string",
+                "title": "SKU",
+                "description": "Product SKU code from the clave field (unique per variant)",
+                "example": "A"
+            },
+            "name": {
+                "type": "string",
+                "title": "Product Name",
+                "description": "Product name in Spanish from the producto field",
+                "example": "Maquillaje Compacto 11.5g"
+            },
+            "price": {
+                "type": "integer",
+                "title": "Price (MXN)",
+                "description": "Price in MXN parsed from the precio string field (range 170-1670)",
+                "example": 630
+            },
+            "currency": {
+                "type": "string",
+                "title": "Currency",
+                "description": "Three-letter currency code, always MXN",
+                "enum": ["MXN"],
+                "example": "MXN"
+            },
+            "departmentId": {
+                "type": "string",
+                "title": "Department ID",
+                "description": "Department code 1-10 from the departamento field",
+                "example": "1"
+            },
+            "department": {
+                "type": "string",
+                "title": "Department",
+                "description": "Department name resolved from /getDeptos lookup (e.g. Color, Fragancias)",
+                "example": "Color"
+            },
+            "subdepartmentId": {
+                "type": "string",
+                "title": "Subdepartment ID",
+                "description": "Subdepartment code from the subdepartamento field",
+                "example": "1"
+            },
+            "subdepartment": {
+                "type": "string",
+                "title": "Subdepartment",
+                "description": "Subdepartment name resolved from /getDeptos secciones (e.g. Rostro, Él)",
+                "example": "Rostro"
+            },
+            "description": {
+                "type": "string",
+                "title": "Description",
+                "description": "Product description with HTML tags stripped, from the descripcion field",
+                "example": "Brinda al cutis una apariencia perfecta. Ideal para todo tipo de piel."
+            },
+            "application": {
+                "type": "string",
+                "title": "Application Instructions",
+                "description": "Application/usage instructions with HTML stripped, from the aplicacion field",
+                "example": "Pasar la esponja en el compacto."
+            },
+            "ingredients": {
+                "type": "string",
+                "title": "Ingredients",
+                "description": "Ingredients info with HTML stripped, from the ingredientes field",
+                "example": "Vitamina E - Actividad antioxidante."
+            },
+            "olfactiveFamily": {
+                "type": "string",
+                "title": "Olfactive Family",
+                "description": "Olfactory family for fragrances (empty for most products, 4/225 have values)",
+                "example": "Floral"
+            },
+            "imageUrls": {
+                "type": "array",
+                "title": "Image URLs",
+                "description": "Product image URLs: primary from webImagesBaseUrl (/shopping-cart/color/{clave}.jpg), fallback from imagen field",
+                "items": { "type": "string" },
+                "example": ["https://webimages.terramarbrands.com.mx/shopping-cart/color/A.jpg"]
+            },
+            "fichaTecnica": {
+                "type": "string",
+                "title": "Technical Data Sheet",
+                "description": "URL to the product technical data sheet PDF from webImagesBaseUrl fichasTecnicas path",
+                "example": "https://webimages.terramarbrands.com.mx/webpage/productos/fichasTecnicas/A.pdf"
+            },
+            "hasCarousel": {
+                "type": "boolean",
+                "title": "Has Image Carousel",
+                "description": "Whether the product has an image carousel (carrusel=S, true for 95/225 products)",
+                "example": true
+            },
+            "variantClass": {
+                "type": "string",
+                "title": "Variant Class",
+                "description": "Variant/shade class number from clase field (30/225 products have values)",
+                "example": "5"
+            },
+            "url": {
+                "type": "string",
+                "title": "Product URL",
+                "description": "Constructed SPA product page URL: {baseUrl}/products/product/{clave}",
+                "example": "https://terramarbrands.com.mx/products/product/A"
+            }
+        },
+        "required": ["sku", "name", "price", "currency", "url"]
     },
     "views": {
         "overview": {
             "title": "Overview",
+            "description": "Product catalog overview showing key identifiers, classification, pricing, and links.",
             "transformation": {
                 "fields": [
                     "sku",
@@ -30,6 +125,8 @@
                     "subdepartment",
                     "price",
                     "currency",
+                    "imageUrls",
+                    "fichaTecnica",
                     "hasCarousel",
                     "url"
                 ]
@@ -60,6 +157,14 @@
                     "currency": {
                         "label": "Currency",
                         "format": "text"
+                    },
+                    "imageUrls": {
+                        "label": "Images",
+                        "format": "array"
+                    },
+                    "fichaTecnica": {
+                        "label": "Data Sheet",
+                        "format": "link"
                     },
                     "hasCarousel": {
                         "label": "Carousel",
