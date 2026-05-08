@@ -1,3 +1,4 @@
+import * as cheerio from 'cheerio';
 import { resolveDepartmentName, resolveSubDepartmentName } from './api.js';
 import type { DepartmentLookup, ProductItem, RawApiProduct } from './types.js';
 
@@ -8,19 +9,10 @@ export interface SiteConfig {
 
 function stripHtml(html: string): string {
     if (!html) return '';
-    return html
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<\/p>/gi, '\n')
-        .replace(/<\/li>/gi, '\n')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+    const $ = cheerio.load(html);
+    $('br').replaceWith('\n');
+    $('p, li').each(function () { $(this).append('\n'); });
+    return $.text().replace(/\n{3,}/g, '\n\n').trim();
 }
 
 function buildImageUrls(product: RawApiProduct, webImagesBaseUrl: string): string[] {
