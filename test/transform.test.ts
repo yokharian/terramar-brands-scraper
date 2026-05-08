@@ -70,7 +70,7 @@ describe('transformProduct', () => {
 
     it('should construct primary image URL from clave', () => {
         const result = transformProduct(MOCK_PRODUCT, MOCK_DEPT_LOOKUP, SITE_CONFIG);
-        expect(result.imageUrls[0]).toBe(`${DEFAULT_WEBIMAGES_BASE_URL}/shopping-cart/color/A.jpg`);
+        expect(result.imageUrls[0]).toBe(`${DEFAULT_WEBIMAGES_BASE_URL}/shopping-cart/cart-products/A.jpg`);
     });
 
     it('should construct fichaTecnica URL from clave', () => {
@@ -93,7 +93,7 @@ describe('transformProduct', () => {
     });
 
     it('should not duplicate image URLs', () => {
-        const dupe = { ...MOCK_PRODUCT, imagen: `${DEFAULT_WEBIMAGES_BASE_URL}/shopping-cart/color/A.jpg` };
+        const dupe = { ...MOCK_PRODUCT, imagen: `${DEFAULT_WEBIMAGES_BASE_URL}/shopping-cart/cart-products/A.jpg` };
         const result = transformProduct(dupe, MOCK_DEPT_LOOKUP, SITE_CONFIG);
         expect(result.imageUrls).toHaveLength(1);
     });
@@ -129,7 +129,7 @@ describe('transformProduct', () => {
         const customConfig = { baseUrl: 'https://custom.example.com', webImagesBaseUrl: 'https://webimages.custom.example.com' };
         const result = transformProduct(MOCK_PRODUCT, MOCK_DEPT_LOOKUP, customConfig);
         expect(result.url).toBe('https://custom.example.com/products/product/A');
-        expect(result.imageUrls[0]).toBe('https://webimages.custom.example.com/shopping-cart/color/A.jpg');
+        expect(result.imageUrls[0]).toBe('https://webimages.custom.example.com/shopping-cart/cart-products/A.jpg');
         expect(result.fichaTecnica).toBe('https://webimages.custom.example.com/webpage/productos/fichasTecnicas/A.pdf');
     });
 });

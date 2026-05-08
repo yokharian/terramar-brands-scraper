@@ -12,14 +12,17 @@ function stripHtml(html: string): string {
     const $ = cheerio.load(html);
     $('br').replaceWith('\n');
     $('p, li').each(function () { $(this).append('\n'); });
-    return $.text().replace(/\n{3,}/g, '\n\n').trim();
+    return $.text()
+        .replace(/\u00A0/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
 }
 
-function buildImageUrls(product: RawApiProduct, webImagesBaseUrl: string): string[] {
+function buildImageUrls(product: RawApiProduct, webImagesBaseUrl: string, baseUrl: string): string[] {
     const urls: string[] = [];
     urls.push(`${webImagesBaseUrl}/shopping-cart/cart-products/${product.clave}.jpg`);
     if (product.imagen) {
-        const fullUrl = product.imagen;
+        const fullUrl = product.imagen.startsWith('/') ? `${baseUrl}${product.imagen}` : product.imagen;
         if (!urls.includes(fullUrl)) {
             urls.push(fullUrl);
         }
@@ -49,7 +52,7 @@ export function transformProduct(
         application: stripHtml(raw.aplicacion),
         ingredients: stripHtml(raw.ingredientes),
         olfactiveFamily: raw.familiaOlfativa,
-        imageUrls: buildImageUrls(raw, siteConfig.webImagesBaseUrl),
+        imageUrls: buildImageUrls(raw, siteConfig.webImagesBaseUrl, siteConfig.baseUrl),
         fichaTecnica: buildFichaTecnica(raw, siteConfig.webImagesBaseUrl),
         hasCarousel: raw.carrusel === 'S',
         variantClass: raw.clase,
